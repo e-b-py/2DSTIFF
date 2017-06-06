@@ -70,7 +70,6 @@ C     .. Common Scalars ..
 C     ..
 C     .. Executable statements ..
 C
-      OPEN(UNIT=15, FILE='debug.log')
 C     Loop over elements
 C
       ELDOF = 0.D0

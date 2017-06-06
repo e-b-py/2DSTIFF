@@ -49,11 +49,6 @@ C     ..
 C
 C     .. Executable statements ..
 C
-C     Open the files for I/O
-C
-      OPEN(UNIT=11, FILE='input.dat')
-      OPEN(UNIT=12, FILE='output.dat')
-C
 C     Read the nodal coordinates
 C
 C     Skip the headers

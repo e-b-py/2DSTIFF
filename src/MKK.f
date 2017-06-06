@@ -109,11 +109,6 @@ C     .. Common Scalars ..
 C     ..
 C     .. Executable statements ..
 C
-C     Open the file to write the force, stiffness and transformation
-C     matrices of elements 
-C
-      OPEN(UNIT=16, FILE='elstiff.dat', FORM='UNFORMATTED')
-C
 C     Get the start & end coordinates of the element, associate the
 C     global degrees of freedom corresponding to the locals
 C
@@ -312,12 +307,6 @@ C
          FEF(3) = FEF(3) - 2*ALPH*DTT*E*INE/H
          FEF(6) = FEF(6) + 2*ALPH*DTT*E*INE/H
       ENDIF
-      PRINT *,
-      WRITE(*, '(A, I3, A)') 'Element', I, 'FEF before transformation'
-      DO 91 J = 1, 6
-         WRITE(*, '(F8.3)'), FEF(J)
-   91 CONTINUE
-      PRINT *,
 C
 C     Write FEF to file before rotating 
 C
@@ -330,12 +319,6 @@ C
             FL(M) = FL(M) + T(M, N) * (-FEF(N))
   130    CONTINUE
   120 CONTINUE
-      PRINT *,
-      WRITE(*, '(A,I3,2X,A)') 'Element', I, 'FEF after transformation'
-      DO 92 J = 1, 6
-         WRITE(*, '(F8.3)'), FL(J)
-   92 CONTINUE
-      PRINT *,
       RETURN
 C
 C     .. End of MKK ..

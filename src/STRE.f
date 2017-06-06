@@ -28,6 +28,8 @@ C                      SY   : y-coordinate of the start node
 C                      LX   : Member length in x direction
 C                      LY   : Member length in y direction
 C                      L    : Total length of member
+C                      CSA  : Direction cosine - x
+C                      SNA  : Direction cosine - y
 C                      DIV  : Number of subdivisions along the length
 C                      STP  : Current step
 C                      INC  : Increment 
@@ -35,6 +37,7 @@ C                      AXF  : Axial force
 C                      SHF  : Shear force
 C                      BMO  : Bending moment
 C                      DV   : Vertical displacement
+C                      DH   : Horizontal displacement
 C                      PX   : Distributed load axial load
 C                      PY1  : Value of distributed vertical load at SNOD
 C                      PY2  : Value of distributed vertical load at ENOD
@@ -42,10 +45,6 @@ C                      QY   : Difference between PY2 and PY1
 C                      N1   : Axial force at member end (start)
 C                      T1   : Shear force at member end (start)
 C                      M1   : Bending moment at member end (start)
-C                      D1   : Vertical displacement at member end
-C                      THE1 : Rotation at member end
-C                 
-C                      
 C     ..
 C     .. Local Arrays ..
 C     INTEGER*4        ELDOF(6) : Global DOFs corresponding to locals 
@@ -80,7 +79,7 @@ C     ..
 C     .. Local Arrays ..
       REAL*8           T(6, 6), KL(6, 6), FEF(6), FL(6), DSPL(6), SX,
      ;                 SY, LX, LY, L, DIV, INC, STP, PX, PY1, PY2, N1,
-     ;                 T1, M1, D1, THE1
+     ;                 T1, M1, DV, DH, CSA, SNA
       INTEGER*4        ELDOF(6)
 
 C     .. Common Scalars ..
@@ -91,13 +90,15 @@ C     .. Common Scalars ..
 C     ..
 C     .. Executable statements ..
 C
-C     Rewind the unformatted data file and open internal stress files
+C     Create the Vtk files
+C
+      DIV = 40.D0
+      CALL VTKOUT(DIV, CON, LDCON, CRD, LDCRD)
+      
+C
+C     Rewind the unformatted data file 
 C     
       REWIND(16)
-      OPEN(UNIT=18, FILE='axial.out')
-      OPEN(UNIT=20, FILE='shear.out')
-      OPEN(UNIT=22, FILE='moment.out')
-      OPEN(UNIT=24, FILE='disp.out')
 C
 C     Loop over elements
 C
@@ -176,7 +177,6 @@ C
 C
 C     Compute internal stresses and displacements inside the element
 C
-         DIV = 40.D0
          SCX = CRD(SNOD, 1)
          SCY = CRD(SNOD, 2)
          ECX = CRD(ENOD, 1)
@@ -184,6 +184,8 @@ C
          LY  = ECY - SCY
          LX  = ECX - SCX
          L   = DSQRT(LX**2 + LY**2)
+         CSA = T(1, 1)
+         SNA = T(2, 1)
          INC = L / DIV
          STP = 0.D0
          N1  = -FL(1)
@@ -193,28 +195,35 @@ C
          PY1 = ELDS(I, 2)
          PY2 = ELDS(I, 3)
          QY  = PY2 - PY1
-         D1  = DSPL(2)
-         THE1= DSPL(3)
-         WRITE(18, '(A, I3)') 'Element', I
-         WRITE(20, '(A, I3)') 'Element', I
-         WRITE(22, '(A, I3)') 'Element', I
-         WRITE(24, '(A, I3)') 'Element', I
-         WRITE(18, '(F15.4 F15.4)') STP, N1
-         WRITE(20, '(F15.4, F15.4)') STP, T1
-         WRITE(22, '(F15.4, F15.4)') STP, M1
-         WRITE(24, '(F15.4, F15.4)') STP, DV
-         WRITE(18, *) STP, L
+         DH  = DSPL(1)
+         DV  = DSPL(2)
+C
+C     Write the initial values before loop along element length
+C     according to vtk warpvector convention (and transform local disp. 
+C     to global 
+C
+         WRITE(18, '(F24.16, F24.16, F24.16)') N1*SNA, N1*CSA, 0.D0
+         WRITE(20, '(F24.16, F24.16, F24.16)') T1*SNA, T1*CSA, 0.D0
+         WRITE(22, '(F24.16, F24.16, F24.16)') M1*CSA, M1*CSA, 0.D0
+         WRITE(24, '(F24.16, F24.16, F24.16)') 
+     ;               (CSA*DH - SNA*DV), (SNA*DH + CSA*DV), 0.D0
    60    IF( DABS(STP - L).GT.1.D-10 ) THEN
             STP = STP + INC
             AXF = N1 - PX*STP
             SHF = T1 + PY1*STP + QY*STP**2/(2.D0*L)
             BMO = M1 + T1*STP + PY1*STP**2/2.D0 + QY*STP**3/(6.D0*L)
-            WRITE(18, '(F15.4 F15.4)') STP, AXF
-            WRITE(20, '(F15.4, F15.4)') STP, SHF
-            WRITE(22, '(F15.4, F15.4)') STP, BMO
+            CALL CUBIC(DSPL, STP, DH, DV)
+            WRITE(18, '(F24.16, F24.16, F24.16)') AXF*SNA, AXF*CSA, 0.D0
+            WRITE(20, '(F24.16, F24.16, F24.16)') SHF*SNA, SHF*CSA, 0.D0
+            WRITE(22, '(F24.16, F24.16, F24.16)') BMO*SNA, BMO*CSA, 0.D0
+            WRITE(24, '(F24.16, F24.16, F24.16)') 
+     ;                  (CSA*DH - SNA*DV), (SNA*DH + CSA*DV), 0.D0
             GO TO 60
          ENDIF
    10 CONTINUE
       RETURN
+C
+C     .. End of STRE ..
+C
       END
          

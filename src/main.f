@@ -28,6 +28,18 @@ C     ..
 C 
 C     .. Executable Statements .. 
 C
+C     Open files for I/O and debug
+C
+      OPEN(UNIT=11, FILE='input.dat')
+      OPEN(UNIT=12, FILE='../out/output.dat')
+      OPEN(UNIT=15, FILE='../debug/debug.out')
+      OPEN(UNIT=16, FILE='../out/elstiff.dat', FORM='UNFORMATTED')
+      OPEN(UNIT=18, FILE='../out/axial.vtk') 
+      OPEN(UNIT=20, FILE='../out/shear.vtk') 
+      OPEN(UNIT=22, FILE='../out/moment.vtk') 
+      OPEN(UNIT=24, FILE='../out/deformed.vtk') 
+      OPEN(UNIT=26, FILE='../out/undeformed.vtk') 
+C
 C     Initialize the leading dimensions
 C
       LDCRD = MAXND   
@@ -67,45 +79,10 @@ C
      ;           LDCMAT, IMAT, RST, LDRST, LNK, LDLNK)
 
       CALL SCODE(IDOF, LDIDOF, RST, LDRST, LNK, LDLNK)
-      PRINT *, 'Number of DOFs', NDOF
-      PRINT *, 'After SCODE, IDOF matrix'
-      DO 30 I = 1, NNODE
-         PRINT *,
-         DO 40 J = 1, 3
-            WRITE(*,'(I5)',ADVANCE='NO') IDOF(I, J)
-   40    CONTINUE
-   30 CONTINUE
       CALL LOADS(IDOF, LDIDOF, ELDS, LDELDS, NLDS)
-      PRINT *,
-      PRINT *, 'Nodal Loads'
-      DO 50 I = 1, NDOF
-         WRITE(*, *) NLDS(I)
-   50 CONTINUE
-      PRINT *,
-      PRINT *, 'Element Loads'
-      DO 60 I = 1, NELE
-         PRINT *,
-         DO 70 J = 1, 5
-         WRITE(*, '(F8.2)', ADVANCE='NO') ELDS(I, J)
-   70    CONTINUE
-   60 CONTINUE
-      PRINT *,
       CALL ASSEMB(CON, LDCON, CRD, LDCRD, IDOF, LDIDOF, CSEC, LDCSEC,
      ;            ISEC, CMAT, LDCMAT, IMAT, ELDS, LDELDS, NLDS, KL,
      ;            FL, KG, LDKG, FG)
-      PRINT *,
-      PRINT *, 'GLOBAL STIFFNESS MATRIX'
-      DO 80 I = 1, NDOF
-         WRITE(*,*)
-         DO 90 J = 1, NDOF
-            WRITE(*, '(D14.4)', ADVANCE='NO') KG(I, J)
-   90    CONTINUE
-   80    CONTINUE
-      PRINT *,
-      PRINT *, 'GLOBAL FORCE MATRIX'
-      DO 100 I = 1, NDOF
-         WRITE(*, '(F18.5)') FG(I)
-  100 CONTINUE
       CALL GSOLVE(KG, LDKG, NDOF, NDOF, DSPG, FG)
       PRINT *,
       PRINT *, 'GLOBAL DISPLACEMENTS'

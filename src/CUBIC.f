@@ -1,19 +1,24 @@
 C
 C =====================================================================
-      SUBROUTINE SHAPE(ELDOF)
+      SUBROUTINE CUBIC(DISPL, STP, U, V)
 C
 C     Compute the displacements along the length of the beam by
-C     interpolation using cubic shape functions
+C     interpolation using cubic Hermitian shape functions
 C
 C     .. Array Arguments ..
-C     REAL*8           ELDOF(6)       : Vector of element degrees of
-C                                       freedom 
+C     REAL*8           DISPL(6) : Local displacements
 C     ..
-C     .. Local Scalars ..
-C
+C     .. Scalar Arguments..
+C     REAL*8           STP      : Local x-coordinate
+C                      U        : Displacement along local x-axis
+C                      V        : Displacement along local y-axis
 C     ..
 C     .. Array Arguments ..
-      REAL*8           ELDOF(6)
+      REAL*8           DSPL(6)
+C     ..
+C     .. Scalar Arguments..
+      REAL*8           STP 
+C     ..
 C =====================================================================
 C     .. Local Scalars ..
         
@@ -31,14 +36,14 @@ C     .. Executable statements ..
 C
 C     Axial displacement
 C     
-      U = ELDOF(1)*(1 - X/L) + ELDOF(4)*(X/L)
+      U = DSPL(1)*(1 - STP/L) + DSPL(4)*(STP/L)
 C     
 C     Vertical Displacement     
 C     
-      V = ELDOF(2)*( 1 - 3*(X/L)**2 + 2(X/L)**3) 
-     ;  + ELDOF(3)*( -X*(1 - X/L)**2 ) 
-     ;  + ELDOF(5)*( -3*(X/L)**2 - 2*(X/L)**3 )
-     ;  + ELDOF(6)*( X**2/L*(X/L - 1) )
+      V = DSPL(2)*( 1 - 3*(STP/L)**2 + 2*(STP/L)**3 ) 
+     ;  + DSPL(3)*( -STP*(1 - STP/L)**2 ) 
+     ;  + DSPL(5)*( -3*(STP/L)**2 - 2*(STP/L)**3 )
+     ;  + DSPL(6)*( STP**2/L*(STP/L - 1) )
       RETURN
 C     
 C     .. End of SHAPE ..
