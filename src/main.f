@@ -30,7 +30,7 @@ C     .. Executable Statements ..
 C
 C     Open files for I/O and debug
 C
-      OPEN(UNIT=11, FILE='input.dat')
+      OPEN(UNIT=11, FILE='/dev/stdin')
       OPEN(UNIT=12, FILE='../out/output.dat')
       OPEN(UNIT=15, FILE='../debug/debug.out')
       OPEN(UNIT=16, FILE='../out/elstiff.dat', FORM='UNFORMATTED')

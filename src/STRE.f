@@ -20,11 +20,11 @@ C     .. Local Scalars ..
 C     INTEGER*4        SNOD : Start node of the element
 C                      ENOD : End node of the element
 C                      CDOF : Current DOF inside a loop
-C                      RI   : Raw index  
-C                      CI   : Column index  
 C
-C     REAL*8           SX   : x-coordinate of the start node
-C                      SY   : y-coordinate of the start node
+C     REAL*8           SCX   : x-coordinate of the start node
+C                      SCY   : y-coordinate of the start node
+C                      ECX   : x-coordinate of the end node
+C                      ECY   : y-coordinate of the end node
 C                      LX   : Member length in x direction
 C                      LY   : Member length in y direction
 C                      L    : Total length of member
@@ -74,13 +74,14 @@ C     .. Array Arguments ..
 C     ..
 C =====================================================================
 C     .. Local Scalars ..
-      INTEGER*4        SNOD, ENOD, RI, CI, CDOF
+      INTEGER*4        SNOD, ENOD, CDOF
+      REAL*8           SCX, SCY, ECX, ECY, LX, LY, L, CSA, SNA, DIV, 
+     ;                 STP, INC, AXF, SHF, BMO, DV, DH, PX, PY1, PY2,
+     ;                 QY, N1, T1, M1
 C     ..
 C     .. Local Arrays ..
-      REAL*8           T(6, 6), KL(6, 6), FEF(6), FL(6), DSPL(6), SX,
-     ;                 SY, LX, LY, L, DIV, INC, STP, PX, PY1, PY2, N1,
-     ;                 T1, M1, DV, DH, CSA, SNA
       INTEGER*4        ELDOF(6)
+      REAL*8           T(6, 6), KL(6, 6), FEF(6), FL(6), DSPL(6)
 
 C     .. Common Scalars ..
       INTEGER*4        NNODE, NELE, NSEC, NMAT, NRST, NLNK, NDOF, NNDL,
@@ -89,6 +90,15 @@ C     .. Common Scalars ..
      ;                 NELL
 C     ..
 C     .. Executable statements ..
+C
+      WRITE(12, '(/A/)') '============================================='
+      WRITE(12, '(/A/)') 'Global Displacements'     
+      DO 901 I = 1, NDOF
+         WRITE(12, '(F16.10)') DSPG(I)
+  901 CONTINUE
+      WRITE(12, '(/A/)') 'Member End Forces'     
+      WRITE(12, '(/A, T12, A, T24, A, T36, A, T48, A, T60, A, T72, A)') 
+     ; 'Member', 'N1', 'T1', 'M1', 'N2', 'T2', 'M2'
 C
 C     Create the Vtk files
 C
@@ -128,7 +138,7 @@ C
          WRITE(15, *)
          WRITE(15, '(A, I3, A)') 'Element', I, ': FEF in STRE'
          DO 15 J = 1, 6
-               WRITE(15, '(F8.4)') FEF(J)
+            WRITE(15, '(F8.4)') FEF(J)
    15    CONTINUE
 
          WRITE(15, *)
@@ -174,6 +184,9 @@ C
          DO 18 J = 1, 6
             WRITE(15, *) FL(J) 
    18    CONTINUE
+         WRITE(12, '(I3, 6F12.2)') I, FL(1), FL(2), FL(3), FL(4), FL(5),
+     ;                            FL(6)
+   19    CONTINUE
 C
 C     Compute internal stresses and displacements inside the element
 C
@@ -204,7 +217,7 @@ C     to global
 C
          WRITE(18, '(F24.16, F24.16, F24.16)') N1*SNA, N1*CSA, 0.D0
          WRITE(20, '(F24.16, F24.16, F24.16)') T1*SNA, T1*CSA, 0.D0
-         WRITE(22, '(F24.16, F24.16, F24.16)') M1*CSA, M1*CSA, 0.D0
+         WRITE(22, '(F24.16, F24.16, F24.16)') M1*SNA, M1*CSA, 0.D0
          WRITE(24, '(F24.16, F24.16, F24.16)') 
      ;               (CSA*DH - SNA*DV), (SNA*DH + CSA*DV), 0.D0
    60    IF( DABS(STP - L).GT.1.D-10 ) THEN
@@ -212,7 +225,7 @@ C
             AXF = N1 - PX*STP
             SHF = T1 + PY1*STP + QY*STP**2/(2.D0*L)
             BMO = M1 + T1*STP + PY1*STP**2/2.D0 + QY*STP**3/(6.D0*L)
-            CALL CUBIC(DSPL, STP, DH, DV)
+            CALL CUBIC(DSPL, STP, DH, DV, L)
             WRITE(18, '(F24.16, F24.16, F24.16)') AXF*SNA, AXF*CSA, 0.D0
             WRITE(20, '(F24.16, F24.16, F24.16)') SHF*SNA, SHF*CSA, 0.D0
             WRITE(22, '(F24.16, F24.16, F24.16)') BMO*SNA, BMO*CSA, 0.D0

@@ -99,14 +99,14 @@ C
          INC  = L / DIV
          STP  = 0.D0
          DO 30 J = 18, 26, 2
-            WRITE(J, '(F24.16, F24.16)') SCX, SCY
+            WRITE(J, '(F24.16, F24.16, F24.16)') SCX, SCY, 0.D0
    30    CONTINUE
    40    IF ( DABS(STP - L).GT.1.D-10 ) THEN
             STP = STP + INC
             CRX = SCX + STP*CSA
             CRY = SCY + STP*SNA
             DO 50 J = 18, 26, 2
-               WRITE(J, '(F24.16, F24.16)') CRX, CRY
+               WRITE(J, '(F24.16, F24.16, F24.16)') CRX, CRY, 0.D0
    50       CONTINUE
             GO TO 40
          ENDIF 
@@ -139,7 +139,7 @@ C
          WRITE(J, '(/A, I6)') 'CELL_TYPES', NCELL
   100 CONTINUE
       DO 110 I = 1, NCELL
-         DO 120 J = 18, 24, 2
+         DO 120 J = 18, 26, 2
             WRITE(J, '(I3)') 3
   120    CONTINUE
   110 CONTINUE

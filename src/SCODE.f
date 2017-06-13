@@ -62,6 +62,11 @@ C
             ENDIF
    40    CONTINUE
    30 CONTINUE
+      WRITE(15, '(A/)') 'IDOF'
+      DO 901 I = 1, NNODE
+         WRITE(15, '(I3, I3, I3)') IDOF(I, 1), IDOF(I, 2), IDOF(I, 3)
+  901 CONTINUE
+      WRITE(15, '(/)')
       RETURN
 C
 C     .. End of SCODE ..
