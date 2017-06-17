@@ -20,6 +20,8 @@ C                      NSEC : number of cross sections
 C                      NMAT : number of materials
 C                      NRST : number of restraints
 C                      NLNK : number of links
+C                      NRSTE: number of elastic restraints
+C                      NLNKE: number of elastic links
 C                      NDOF : number of degrees of freedom
 C     ,,
 C     .. Scalar Arguments ..
@@ -30,8 +32,10 @@ C     .. Array Arguments ..
 C     ..
 C =====================================================================
 C     .. Common Scalars ..
-      INTEGER*4        NNODE, NELE, NSEC, NMAT, NRST, NLNK, NDOF
-      COMMON /CONFIG/  NNODE, NELE, NSEC, NMAT, NRST, NLNK, NDOF
+      INTEGER*4       NNODE, NELE, NSEC, NMAT, NRST, NLNK, NRSTE, NLNKE,
+     ;                NDOF
+      COMMON /CONFIG/ NNODE, NELE, NSEC, NMAT, NRST, NLNK, NRSTE, NLNKE,
+     ;                NDOF
 C     ..
 C     .. Executable statements ..
 C

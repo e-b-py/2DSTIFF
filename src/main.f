@@ -5,15 +5,16 @@ C     ..
      ;                   MAXEL = 100,
      ;                   MAXSC = 10,
      ;                   MAXMT = 5,
-     ;                   MAXRT = 20,
-     ;                   MAXLK = 5,
+     ;                   MAXRT = 40,
+     ;                   MAXLK = 20,
      ;                   MAXDF = 3*MAXND )
 C     ..
 C     .. Scalar Variables ..
 C     ..
       INTEGER*4        LDCRD, LDCON, LDCSEC, LDCMAT, LDIDOF, LDELDS,
-     ;                 LDLNK, LDRST, LDKG, NDOF, NELE, NSEC, NMAT,
-     ;                 NRST, NLNK, NNDL, NELL
+     ;                 LDEPRS, LDLNK, LDRST, LDLNKE, LDRSTE, LDKG, NDOF,
+     ;                 NNODE, NELE, NSEC, NMAT, NRST, NLNK, NRSTE,
+     ;                 NLNKE, NNDL, NELL, NPRES     
 C     ..
 C     .. Array Variables ..
 C     ..
@@ -22,9 +23,10 @@ C     ..
       REAL*8           CRD(MAXND, 2), CSEC(MAXSC, 4), CMAT(MAXMT, 4),
      ;                 ELDS(MAXEL, 5), NLDS(MAXND), DSPG(MAXDF),
      ;                 DSPL(6), KL(6, 6), KG(MAXDF, MAXDF), FL(6),
-     ;                 FG(MAXDF)
-      COMMON /CONFIG/ NNODE, NELE, NSEC, NMAT, NRST, NLNK, NDOF, NNDL,
-     ;                NELL
+     ;                 FG(MAXDF), RSTE(MAXRT, 3), LNKE(MAXLK, 4),
+     ;                 EPRS(MAXEL, 4)
+      COMMON /CONFIG/ NNODE, NELE, NSEC, NMAT, NRST, NLNK, NRSTE, NLNKE,
+     ;                NDOF, NNDL, NELL, NPRES
 C 
 C     .. Executable Statements .. 
 C
@@ -48,6 +50,7 @@ C
       LDCMAT= MAXMT   
       LDIDOF= MAXND   
       LDELDS= MAXEL   
+      LDEPRS= MAXEL
       LDNLDS= MAXND   
       LDRST = MAXRT   
       LDLNK = MAXLK   
@@ -61,10 +64,13 @@ C
       IDOF = 0
       RST  = 0
       LNK  = 0
+      RSTE= 0.D0
+      LNKE= 0.D0
       CRD  = 0.D0
       CSEC = 0.D0
       CMAT = 0.D0
       ELDS = 0.D0
+      EPRS = 0.D0
       NLDS = 0.D0
       DSPG = 0.D0
       DSPL = 0.D0
@@ -76,21 +82,18 @@ C
 C     Call the subroutines
 C     
       CALL GEOMET(CRD, LDCRD, CON, LDCON, CSEC, LDCSEC, ISEC, CMAT, 
-     ;           LDCMAT, IMAT, RST, LDRST, LNK, LDLNK)
+     ;           LDCMAT, IMAT, RST, LDRST, LNK, LDLNK, RSTE, LDRSTE,
+     ;           LNKE, LDLNKE)
 
       CALL SCODE(IDOF, LDIDOF, RST, LDRST, LNK, LDLNK)
-      CALL LOADS(IDOF, LDIDOF, ELDS, LDELDS, NLDS)
+      CALL LOADS(IDOF, LDIDOF, ELDS, LDELDS, EPRS, LDEPRS, NLDS)
       CALL ASSEMB(CON, LDCON, CRD, LDCRD, IDOF, LDIDOF, CSEC, LDCSEC,
-     ;            ISEC, CMAT, LDCMAT, IMAT, ELDS, LDELDS, NLDS, KL,
-     ;            FL, KG, LDKG, FG)
+     ;            ISEC, CMAT, LDCMAT, IMAT, ELDS, LDELDS, EPRS, LDEPRS,
+     ;            NLDS, KL, FL, KG, LDKG, FG)
+      CALL JOINT(KG, LDKG, RSTE, LDRSTE, LNKE, LDLNKE, IDOF, LDIDOF)
       CALL GSOLVE(KG, LDKG, NDOF, NDOF, DSPG, FG)
-      PRINT *,
-      PRINT *, 'GLOBAL DISPLACEMENTS'
-      DO 110 I = 1, NDOF
-         WRITE(*, '(F18.10)') DSPG(I)
-  110 CONTINUE
       CALL STRE(CON, LDCON, CRD, LDCRD, IDOF, LDIDOF, ELDS, LDELDS, 
-     ;          DSPG)
+     ;          EPRS, LDEPRS, DSPG)
       STOP
       END
 

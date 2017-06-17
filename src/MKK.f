@@ -78,9 +78,12 @@ C                      NSEC : number of cross sections
 C                      NMAT : number of materials
 C                      NRST : number of restraints
 C                      NLNK : number of links
+C                      NRSTE: number of elastic restraints
+C                      NLNKE: number of elastic links
 C                      NDOF : number of degrees of freedom
 C                      NNDL : number of nodal loads
 C                      NELL : number of element loads
+C                      NPRES: number of prestressed elements
 C     ,,
 C     .. Scalar Arguments ..
       INTEGER*4        LDCON, LDCRD, LDIDOF, LDCSEC, LDCMAT, LDELDS,
@@ -102,10 +105,10 @@ C     ..
 C     .. Local Arrays ..
       REAL*8           T(6, 6), FEF(6), TMPK(6, 6)
 C     .. Common Scalars ..
-      INTEGER*4        NNODE, NELE, NSEC, NMAT, NRST, NLNK, NDOF, NNDL,
-     ;                 NELL
-      COMMON /CONFIG/  NNODE, NELE, NSEC, NMAT, NRST, NLNK, NDOF, NNDL,
-     ;                 NELL
+      INTEGER*4       NNODE, NELE, NSEC, NMAT, NRST, NLNK, NRSTE, NLNKE,
+     ;                NDOF, NNDL, NELL, NPRES
+      COMMON /CONFIG/ NNODE, NELE, NSEC, NMAT, NRST, NLNK, NRSTE, NLNKE,
+     ;                NDOF, NNDL, NELL, NPRES
 C     ..
 C     .. Executable statements ..
 C

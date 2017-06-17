@@ -1,13 +1,15 @@
 C
 C =====================================================================
       SUBROUTINE GEOMET(CRD, LDCRD, CON, LDCON, CSEC, LDCSEC, ISEC,
-     ;                  CMAT, LDCMAT, IMAT, RST, LDRST, LNK, LDLNK)
+     ;                  CMAT, LDCMAT, IMAT, RST, LDRST, LNK, LDLNK,
+     ;                  RSTE, LDRSTE, LNKE, LDLNKE)
 C
 C     Read the node, element, cross section, material, restraint, and
 C     link data provided in the input file into the related arrays.
 C
 C     .. Scalar Arguments ..
-C     INTEGER*4        LDCRD, LDCON, LDCSEC, LDCMAT, LDRST, LDLNK
+C     INTEGER*4        LDCRD, LDCON, LDCSEC, LDCMAT, LDRST, LDLNK, 
+C                      LDRSTE, LDLNKE
 C     ..
 C     .. Array Arguments ..
 C     INTEGER*4        CON(LDCON, *)  : Element connectivity matrix
@@ -19,6 +21,8 @@ C
 C     REAL*8           CRD(LDCRD, *)  : Matrix of nodal coordinates
 C                      CSEC(LDCSEC, *): Matrix of section properties
 C                      CMAT(LDCMAT, *): Matrix of material properties
+C                      RSTE(LDRSTE, *): Matrix of elastic restraints
+C                      LNKE(LDLNKE, *): Matrix of elastic links
 C     ..
 C     .. Common Scalars ..
 C     INTEGER*4        NNODE: number of nodes
@@ -27,6 +31,8 @@ C                      NSEC : number of cross sections
 C                      NMAT : number of materials
 C                      NRST : number of restraints
 C                      NLNK : number of links
+C                      NRSTE: number of elastic restraints
+C                      NLNKE: number of elastic links
 C                      NDOF : number of degrees of freedom
 C                      NNDL : number of nodal loads
 C                      NELL : number of element loads
@@ -37,14 +43,16 @@ C     ..
 C     .. Array Arguments ..
       INTEGER*4        CON(LDCON, *), ISEC(*), IMAT(*), RST(LDRST, *),
      ;                 LNK(LDLNK, *)
-      REAL*8           CRD(LDCRD, *), CSEC(LDCSEC, *), CMAT(LDCMAT, *)
+      REAL*8           CRD(LDCRD, *), CSEC(LDCSEC, *), CMAT(LDCMAT, *),
+     ;                 RSTE(LDRSTE, *), LNKE(LDLNKE, *)
 C     ..
 C =====================================================================
 C     .. Common Scalars ..
-      INTEGER*4        NNODE, NELE, NSEC, NMAT, NRST, NLNK, NDOF, NNDL,
-     ;                 NELL
-      COMMON /CONFIG/  NNODE, NELE, NSEC, NMAT, NRST, NLNK, NDOF, NNDL,
-     ;                 NELL
+      INTEGER*4       NNODE, NELE, NSEC, NMAT, NRST, NLNK, NRSTE, NLNKE,
+     ;                NDOF, NNDL, NELL
+      COMMON /CONFIG/ NNODE, NELE, NSEC, NMAT, NRST, NLNK, NRSTE, NLNKE,
+     ;                NDOF, NNDL, NELL
+      
 C     ..
 C
 C     .. Executable statements ..
@@ -112,52 +120,87 @@ C
       DO 80 I = 1, NLNK
          READ(11, *) (LNK(I, J), J=1,3)
    80 CONTINUE
+C
+C     Read elastic restraints
+C
+      READ(11, *)
+      READ(11, *) NRSTE
+      DO 90 I = 1, NRSTE
+         READ(11, *) (RSTE(I, J), J=1,3)
+   90 CONTINUE
+C
+C     Read elastic links
+C
+      READ(11, *)
+      READ(11, *) NLNKE
+      DO 100 I = 1, NLNKE
+         READ(11, *) (LNKE(I, J), J=1,4)
+  100 CONTINUE
 C =====================================================================
 C 
 C Write all to output file
 C 
+      WRITE(12, '(A)') '================================================
+     ;================================'
       WRITE(12, '(A)') 'INPUT DATA: [kN/m/C]'
-      WRITE(12, '(A)') '-----------------------------------------------'
-      WRITE(12, '(A)') '# NODE COORDINATES'
+      WRITE(12, '(A)') '================================================
+     ;================================'
+      WRITE(12, '(/A)') '# NODE COORDINATES'
       WRITE(12, '(A, T14, A, T26, A)') 'Node', 'x-coord', 'y-coord'
-      DO 90 I = 1, NNODE
+      DO 110 I = 1, NNODE
          WRITE(12, '(I3, T8, 2F12.2)') I, CRD(I, 1), CRD(I, 2)
-   90 CONTINUE
+  110 CONTINUE
       WRITE(12, '(/A)') '# SECTIONS'
-      WRITE(12, '(A, T16, A, T32, A, T45, A, T56, A)') 
+      WRITE(12, '(A, T20, A, T40, A, T58, A, T77, A)') 
      ;           'Sec.No','A', 'I', 'h', 'X'
-      DO 100 I = 1, NSEC
-         WRITE(12, '(I3, T12, D9.4, T28, D9.4, T42, F7.4, T52, F7.4)')
+      DO 120 I = 1, NSEC
+         WRITE(12, '(I3, T16, D9.4, T35, D9.4, T55, F7.4, T74, F7.4)')
      ;               I, (CSEC(I, J), J=1,4)
-  100 CONTINUE
+  120 CONTINUE
       WRITE(12, '(/A)') '# MATERIALS'
-      WRITE(12, '(A, T20, A, T40, A, T56, A, T75, A)') 
-     :           'Mat.No', 'E', 'v', 'alpha', 'gamma'
-      DO 110 I = 1, NMAT
+      WRITE(12, '(A, T20, A, T40, A, T56, A, T76, A)') 
+     ;           'Mat.No', 'E', 'v', 'alpha', 'gamma'
+      DO 130 I = 1, NMAT
          WRITE(12, '(I3, T16, D9.4, T36, F6.2, T54, D9.4, T74, F7.4)')
      ;              I, (CMAT(I, J), J=1,4)
-  110 CONTINUE
+  130 CONTINUE
       WRITE(12, '(/A)') '# ELEMENTS'
-      WRITE(12, '(A, T12, A, T28, A, T41, A, T56, A)') 
+      WRITE(12, '(A, T12, A, T28, A, T43, A, T57, A)') 
      ;           'El.No','Start Node', 'End Node', 'Section', 'Material'
-      DO 120 I = 1, NELE
-         WRITE(12, '(I3, T14, I3, T28, I3, T42, I3, T57, I3)')
+      DO 140 I = 1, NELE
+         WRITE(12, '(I3, T14, I3, T28, I3, T44, I3, T58, I3)')
      ;               I, CON(I, 1), CON(I, 2), ISEC(I), IMAT(I)
-  120 CONTINUE
+  140 CONTINUE
       WRITE(12, '(/A)') '# RESTRAINTS'
       WRITE(12, '(A, T22, A, T38, A)')
      ;           'Restraint No', 'Node', 'Direction'
-      DO 130 I = 1, NRST
+      DO 150 I = 1, NRST
          WRITE(12, '(I3, T22, I3, T40, I3)')
      ;               I, RST(I, 1), RST(I, 2)
-  130 CONTINUE
+  150 CONTINUE
       WRITE(12, '(/A)') '# LINKS'
-      WRITE(12, '(A, T18, A, T38, A, T54, A)')
+      WRITE(12, '(A, T18, A, T38, A, T57, A)')
      ;           'Link No', 'Master Node', 'Slave Node', 'Direction'
-      DO 140 I = 1, NLNK
-         WRITE(12, '(I3, T20, I3, T40, I3, T56, I3)') 
+      DO 160 I = 1, NLNK
+         WRITE(12, '(I3, T20, I3, T40, I3, T59, I3)') 
      ;               I, (LNK(I, J), J=1,3)
-  140 CONTINUE
+  160 CONTINUE
+      RETURN
+      WRITE(12, '(/A)') '# ELASTIC RESTRAINTS'
+      WRITE(12, '(A, T18, A, T38, A, T54, A)')
+     ;          'E. Restr. No', 'Node', 'Direction', 'K'
+      DO 170 I = 1, NRSTE
+         WRITE(12, '(I3, T20, I3, T40, I3, T56, D14.4)') 
+     ;               I, (LNK(I, J), J=1,3)
+  170 CONTINUE
+      WRITE(12, '(/A)') '# ELASTIC LINKS'
+      WRITE(12, '(A, T18, A, T38, A, T54, A)')
+     ;          'E. Link. No', 'Node 1', 'Node 2', 'Direction', 'K'
+      DO 180 I = 1, NLNKE
+         WRITE(12, '(I3, T20, I3, T40, I3, T56, I3, T70, D14.4)') 
+     ;               I, (LNK(I, J), J=1,4)
+  180 CONTINUE
+      RETURN
       RETURN
 C
 C     .. End of GEOMET ..

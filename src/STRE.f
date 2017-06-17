@@ -45,6 +45,7 @@ C                      QY   : Difference between PY2 and PY1
 C                      N1   : Axial force at member end (start)
 C                      T1   : Shear force at member end (start)
 C                      M1   : Bending moment at member end (start)
+C                      CDSIP: Current displacement inside loop
 C     ..
 C     .. Local Arrays ..
 C     INTEGER*4        ELDOF(6) : Global DOFs corresponding to locals 
@@ -61,9 +62,12 @@ C                      NSEC : number of cross sections
 C                      NMAT : number of materials
 C                      NRST : number of restraints
 C                      NLNK : number of links
+C                      NRSTE: number of elastic restraints
+C                      NLNKE: number of elastic links
 C                      NDOF : number of degrees of freedom
 C                      NNDL : number of nodal loads
 C                      NELL : number of element loads
+C                      NPRES: number of prestressed elements
 C     ,,
 C     .. Scalar Arguments ..
       INTEGER*4        LDCON, LDIDOF, LDCRD, LDELDS
@@ -77,27 +81,43 @@ C     .. Local Scalars ..
       INTEGER*4        SNOD, ENOD, CDOF
       REAL*8           SCX, SCY, ECX, ECY, LX, LY, L, CSA, SNA, DIV, 
      ;                 STP, INC, AXF, SHF, BMO, DV, DH, PX, PY1, PY2,
-     ;                 QY, N1, T1, M1
+     ;                 QY, N1, T1, M1, CDISP
 C     ..
 C     .. Local Arrays ..
       INTEGER*4        ELDOF(6)
       REAL*8           T(6, 6), KL(6, 6), FEF(6), FL(6), DSPL(6)
 
 C     .. Common Scalars ..
-      INTEGER*4        NNODE, NELE, NSEC, NMAT, NRST, NLNK, NDOF, NNDL,
-     ;                 NELL
-      COMMON /CONFIG/  NNODE, NELE, NSEC, NMAT, NRST, NLNK, NDOF, NNDL,
-     ;                 NELL
+      INTEGER*4       NNODE, NELE, NSEC, NMAT, NRST, NLNK, NRSTE, NLNKE,
+     ;                NDOF, NNDL, NELL, NPRES
+      COMMON /CONFIG/ NNODE, NELE, NSEC, NMAT, NRST, NLNK, NRSTE, NLNKE,
+     ;                NDOF, NNDL, NELL, NPRES
 C     ..
 C     .. Executable statements ..
 C
-      WRITE(12, '(/A/)') '============================================='
-      WRITE(12, '(/A/)') 'Global Displacements'     
-      DO 901 I = 1, NDOF
-         WRITE(12, '(F16.10)') DSPG(I)
+C     Write results to output file 
+C
+      WRITE(12, *)
+      WRITE(12, '(A)') '================================================
+     ;================================'
+      WRITE(12, '(A)') 'ANALYSIS RESULTS'
+      WRITE(12, '(A)') '================================================
+     ;================================'
+      WRITE(12, '(/A/)') '>> NODAL DISPLACEMENTS'     
+      WRITE(12, '(A, T17, A, T39, A)') 'Node', 'DX', 'DY'
+      DO 901 I = 1, NNODE
+         WRITE(12, '(/I3)', ADVANCE='NO') I
+         DO 902 J = 1, 2
+            IF( IDOF(I, J).EQ.-1 ) THEN
+               CDISP = 0.D0
+            ELSE
+               CDISP = DSPG(IDOF(I, J))
+            ENDIF
+            WRITE(12, '(D22.10)', ADVANCE='NO') CDISP
+  902    CONTINUE
   901 CONTINUE
-      WRITE(12, '(/A/)') 'Member End Forces'     
-      WRITE(12, '(/A, T12, A, T24, A, T36, A, T48, A, T60, A, T72, A)') 
+      WRITE(12, '(///A/)') '>> MEMBER END FORCES'     
+      WRITE(12, '(A, T12, A, T24, A, T36, A, T48, A, T60, A, T72, A)') 
      ; 'Member', 'N1', 'T1', 'M1', 'N2', 'T2', 'M2'
 C
 C     Create the Vtk files
