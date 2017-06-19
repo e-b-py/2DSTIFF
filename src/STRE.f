@@ -1,12 +1,12 @@
 C
 C =====================================================================
       SUBROUTINE STRE(CON, LDCON, CRD, LDCRD, IDOF, LDIDOF, 
-     ;                ELDS, LDELDS, DSPG)
+     ;                ELDS, LDELDS, EPRS, LDEPRS, DSPG)
 C
 C     Compute the member end forces, internal 
 C
 C     .. Scalar Arguments ..
-C     INTEGER*4        LDCON, LDCRD, LDIDOF, LDELDS, 
+C     INTEGER*4        LDCON, LDCRD, LDIDOF, LDELDS, LDEPRS
 C     ..
 C     .. Array Arguments ..
 C     INTEGER*4        CON(LDCON, *)  : Connectivity matrix
@@ -14,6 +14,7 @@ C                      IDOF(LDIDOF, *): Matrix of the degrees of freedom
 C
 C     REAL*8           CRD(LDCRD, *)  : Matrix of coordinates
 C                      ELDS(LDELDS, *): Matrix of element loads
+C                      EPRS(LDEPRS, *): Matrix of prestressing
 C                      DSPG(*)        : Global nodal displacement vector
 C     ..
 C     .. Local Scalars ..
@@ -21,10 +22,10 @@ C     INTEGER*4        SNOD : Start node of the element
 C                      ENOD : End node of the element
 C                      CDOF : Current DOF inside a loop
 C
-C     REAL*8           SCX   : x-coordinate of the start node
-C                      SCY   : y-coordinate of the start node
-C                      ECX   : x-coordinate of the end node
-C                      ECY   : y-coordinate of the end node
+C     REAL*8           SCX  : x-coordinate of the start node
+C                      SCY  : y-coordinate of the start node
+C                      ECX  : x-coordinate of the end node
+C                      ECY  : y-coordinate of the end node
 C                      LX   : Member length in x direction
 C                      LY   : Member length in y direction
 C                      L    : Total length of member
@@ -42,6 +43,12 @@ C                      PX   : Distributed load axial load
 C                      PY1  : Value of distributed vertical load at SNOD
 C                      PY2  : Value of distributed vertical load at ENOD
 C                      QY   : Difference between PY2 and PY1
+C                      ECC1 : Eccenctricity of cable at the start node
+C                      ECC2 : Eccenctricity of cable at the end node
+C                      ECCM : Eccenctricity of cable at the mid-span
+C                      PPRS : Prestressing force applied at the ends
+C                      THE1 : Angle of cable at the start node
+C                      WP   : Balancing force to ensure cable equilibr.
 C                      N1   : Axial force at member end (start)
 C                      T1   : Shear force at member end (start)
 C                      M1   : Bending moment at member end (start)
@@ -70,18 +77,20 @@ C                      NELL : number of element loads
 C                      NPRES: number of prestressed elements
 C     ,,
 C     .. Scalar Arguments ..
-      INTEGER*4        LDCON, LDIDOF, LDCRD, LDELDS
+      INTEGER*4        LDCON, LDIDOF, LDCRD, LDELDS, LDEPRS
 C     ..
 C     .. Array Arguments ..
       INTEGER*4        CON(LDCON, *), IDOF(LDIDOF, *)
-      REAL*8           CRD(LDCRD, *), ELDS(LDELDS, *), DSPG(*)
+      REAL*8           CRD(LDCRD, *), ELDS(LDELDS, *), EPRS(LDEPRS, *),
+     ;                 DSPG(*)
 C     ..
 C =====================================================================
 C     .. Local Scalars ..
       INTEGER*4        SNOD, ENOD, CDOF
       REAL*8           SCX, SCY, ECX, ECY, LX, LY, L, CSA, SNA, DIV, 
      ;                 STP, INC, AXF, SHF, BMO, DV, DH, PX, PY1, PY2,
-     ;                 QY, N1, T1, M1, CDISP
+     ;                 QY, ECC1, ECC2, ECCM, PPRS, THE1, WP, N1, T1, M1,
+     ;                 CDISP
 C     ..
 C     .. Local Arrays ..
       INTEGER*4        ELDOF(6)
@@ -104,10 +113,10 @@ C
       WRITE(12, '(A)') '================================================
      ;================================'
       WRITE(12, '(/A/)') '>> NODAL DISPLACEMENTS'     
-      WRITE(12, '(A, T17, A, T39, A)') 'Node', 'DX', 'DY'
+      WRITE(12, '(A, T17, A, T39, A, T61, A)') 'Node', 'DX', 'DY', 'PHI'
       DO 901 I = 1, NNODE
          WRITE(12, '(/I3)', ADVANCE='NO') I
-         DO 902 J = 1, 2
+         DO 902 J = 1, 3
             IF( IDOF(I, J).EQ.-1 ) THEN
                CDISP = 0.D0
             ELSE
@@ -221,13 +230,19 @@ C
          SNA = T(2, 1)
          INC = L / DIV
          STP = 0.D0
-         N1  = -FL(1)
-         T1  = FL(2)
-         M1  = -FL(3)
          PX  = ELDS(I, 1)
          PY1 = ELDS(I, 2)
          PY2 = ELDS(I, 3)
          QY  = PY2 - PY1
+         ECC1= EPRS(I, 1)
+         ECC2= EPRS(I, 2)
+         ECCM= EPRS(I, 3)
+         PPRS= EPRS(I, 4)
+         THE1= -1.D0/L*(3*ECC1 + ECC2 - 4*ECCM)
+         WP  = PPRS*4.D0/L**2*(ECC1 + ECC2 - 2*ECCM)
+         N1  = -FL(1) - PPRS
+         T1  = FL(2) + PPRS*THE1
+         M1  = -FL(3) + PPRS*ECC1
          DH  = DSPL(1)
          DV  = DSPL(2)
 C
@@ -243,8 +258,9 @@ C
    60    IF( DABS(STP - L).GT.1.D-10 ) THEN
             STP = STP + INC
             AXF = N1 - PX*STP
-            SHF = T1 + PY1*STP + QY*STP**2/(2.D0*L)
-            BMO = M1 + T1*STP + PY1*STP**2/2.D0 + QY*STP**3/(6.D0*L)
+            SHF = T1 + (PY1 + WP)*STP + QY*STP**2/(2.D0*L)
+            BMO = M1 + T1*STP + (PY1 + WP)*STP**2/2.D0 
+     ;           + QY*STP**3/(6.D0*L)
             CALL CUBIC(DSPL, STP, DH, DV, L)
             WRITE(18, '(F24.16, F24.16, F24.16)') AXF*SNA, AXF*CSA, 0.D0
             WRITE(20, '(F24.16, F24.16, F24.16)') SHF*SNA, SHF*CSA, 0.D0
@@ -254,6 +270,8 @@ C
             GO TO 60
          ENDIF
    10 CONTINUE
+      WRITE(12, '(A)') '================================================
+     ;================================'
       RETURN
 C
 C     .. End of STRE ..

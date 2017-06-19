@@ -2,14 +2,14 @@ C
 C =====================================================================
       SUBROUTINE MKK(I, CON, LDCON, CRD, LDCRD, IDOF, LDIDOF, CSEC, 
      ;               LDCSEC, ISEC, CMAT, LDCMAT, IMAT, ELDS, LDELDS, 
-     ;               NLDS, KL, FL, KG, LDKG, FG, ELDOF)
+     ;               EPRS, LDEPRS, NLDS, KL, FL, KG, LDKG, FG, ELDOF)
 C
 C     Computes the local stiffness and force matrix of the given element
 C     in the global coordinates
 C
 C     .. Scalar Arguments ..
 C     INTEGER*4        LDCON, LDCRD, LDIDOF, LDCSEC, LDCMAT, LDELDS, 
-C                      LDKG, I
+C                      LDEPRS LDKG, I
 C                      
 C     ..
 C     .. Array Arguments ..
@@ -23,6 +23,7 @@ C                      CSEC(LDCSEC, *): Matrix of section properties
 C                      CMAT(LDCMAT, *): Matrix of material properties
 C                      NLDS(*)        : Vector of nodal loads
 C                      ELDS(LDELDS, *): Matrix of element loads
+C                      EPRS(LDEPRS, *): Matrix of prestressing
 C                      KL(6,6)        : Local stiffness matrix
 C                      FL(6)          : Local force matrix
 C                      KG(LDKG, *)    : Global stiffness matrix
@@ -64,6 +65,13 @@ C                      GX  : Self weight, axial component
 C                      GY  : Self weight, vertical component
 C                      DDT : Difference between temperature variations
 C                      DTM : Mean temperature variation
+C                      ECC1: Eccenctiricty of cable at the start node
+C                      ECC2: Eccenctiricty of cable at the end node
+C                      ECCM: Eccenctiricty of cable at the mid-span
+C                      PPRS: Prestressing force applied at the ends
+C                      THE1: Angle of cable at the start node
+C                      THE2: Angle of cable at the end node
+C                      WP  : Balancing force to ensure cable equilibrium
 C     ..
 C     .. Local Arrays ..
 C     REAL*8           T(6,6)   : Coordinate transformation matrix 
@@ -92,15 +100,16 @@ C     ..
 C     .. Array Arguments ..
       INTEGER*4        CON(LDCON, *), IDOF(LDIDOF, *), ISEC(*), IMAT(*)
       REAL*8           CRD(LDCRD, *), CSEC(LDCSEC, *), CMAT(LDCMAT, *),
-     ;                 NLDS(*), ELDS(LDELDS, *), KL(6, 6), FL(6),
-     ;                 KG(LDKG, *), FG(*), ELDOF(6)
+     ;                 NLDS(*), ELDS(LDELDS, *), EPRS(LDEPRS, *),
+     ;                 KL(6, 6), FL(6), KG(LDKG, *), FG(*), ELDOF(6)
 C     ..
 C =====================================================================
 C     .. Local Scalars ..
       INTEGER*4        SNOD, ENOD, M, N, J, Z, CDOF
       REAL*8           SCX, SCY, ECX, ECY, LX, LY, L, CSA, SNA, E, V,
      ;                 ALPH, GAMM, G, A, INE, H, X, PHI, PX, PY1, PY2,
-     ;                 DTT, DTB, C, QY, GX, GY, DDT, DTM
+     ;                 DTT, DTB, C, QY, GX, GY, DDT, DTM, ECC1, ECC2,
+     ;                 ECCM, PPRS, THE1, THE2, WP
 C     ..
 C     .. Local Arrays ..
       REAL*8           T(6, 6), FEF(6), TMPK(6, 6)
@@ -262,7 +271,7 @@ C
       WRITE(15,*)
 
 C
-C     Compute the fixed end forces TODO burda kaldim FIXME 
+C     Compute the fixed end forces 
 C
       FEF = 0.D0
       FL  = 0.D0
@@ -289,11 +298,25 @@ C
       ELSE
          C = PHI / (1+PHI)
          QY= PY1 - PY2
-         FEF(2) = -PY1*L/2.D0 - 21.D0/60.D0*QY*L*(1.D0 - C/21.D0)
-         FEF(3) = PY1*L/12.D0 + QY*L**2/20.D0*(1.D0 - C/6.D0)
-         FEF(5) = -PY1*L/2.D0 - 9.D0/60.D0*QY*L*(1.D0 + C/9.D0)
-         FEF(6) = -PY1*L**2/12.D0 - QY*L**2/30.D0*(1.D0 + C/9.D0)
+         FEF(2) = -PY2*L/2.D0 - 21.D0/60.D0*QY*L*(1.D0 - C/21.D0)
+         FEF(3) = -PY2*L/12.D0 - QY*L**2/20.D0*(1.D0 - C/6.D0)
+         FEF(5) = -PY2*L/2.D0 - 9.D0/60.D0*QY*L*(1.D0 + C/9.D0)
+         FEF(6) = +PY2*L**2/12.D0 + QY*L**2/30.D0*(1.D0 + C/9.D0)
       ENDIF
+C
+C     Prestressing
+C
+      ECC1 = EPRS(I, 1)
+      ECCM = EPRS(I, 2)
+      ECC2 = EPRS(I, 3)
+      PPRS = EPRS(I, 4)
+      THE1 = -1.D0/L*(3*ECC1 + ECC2 - 4*ECCM)
+      THE2 = 1.D0/L*(ECC1 + 3*ECC2 - 4*ECCM)
+      WP     = PPRS*4.D0/L**2*(ECC1 + ECC2 - 2*ECCM)
+      FEF(2) = FEF(2) - WP*L/2.D0
+      FEF(3) = FEF(3) - WP*L**2/12.D0
+      FEF(5) = FEF(5) - WP*L/2.D0
+      FEF(6) = FEF(6) + WP*L**2/12.D0
 C
 C     Temperature variation
 C
@@ -311,9 +334,18 @@ C
          FEF(6) = FEF(6) + 2*ALPH*DTT*E*INE/H
       ENDIF
 C
-C     Write FEF to file before rotating 
+C     Write FEF to file before adding nodal prestressing forces & rotating 
 C
       WRITE(16) FEF     
+C
+C     Add nodal prestressing contributions to FEF 
+C
+      FEF(1) = FEF(1) - PPRS
+      FEF(2) = FEF(2) - PPRS*THE1
+      FEF(3) = FEF(3) + PPRS*ECC1
+      FEF(4) = FEF(4) + PPRS
+      FEF(5) = FEF(5) + PPRS*THE2
+      FEF(6) = FEF(6) - PPRS*ECC2
 C
 C      Transform the force matrix
 C

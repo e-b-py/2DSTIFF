@@ -1,0 +1,42 @@
+================================================================================
+2DSTIFF - INPUT FILE
+[kN/m/C]
+================================================================================
+# NODES <number of nodes> <x coord, y coord>
+2
+0.0 0.0
+10.0 0.0
+# ELEMENTS <number of elements> <start node, end node>
+1
+1 2
+# SECTIONS <number of sections> <A, I, h, X>
+1
+0.32 0.0170666666666667 0.8 0.0
+# SECTION INCIDENCES
+1
+# MATERIALS <number of materials> <E, v, alpha, gamma>
+1
+30.e6 0.2 0.0 0.0
+# MATERIAL INCIDENCES
+1
+# RESTRAINTS <number of restraints> <node number, direction>
+5
+1 1
+1 2
+2 1
+2 2
+2 3
+# LINKS <number of links> <master node, slave node, direction>
+0
+# ELASTIC RESTRAINTS <number of el. restraints> <node number, direction, k>
+0
+# ELASTIC LINKS <number of links> <node1, node2, direction, k>
+0
+# NODAL LOADS <number of nodal loads> <node, direction, magnitude>
+0
+# ELEMENT LOADS <number> <Element, Px, Py, Py2, DTtop, DTbottom>
+1
+2 0.0 -25.0 -25.0 0.0 0.0
+# PRESTRESSING <number> <Element, e1, em, e2, P>
+0
+================================================================================

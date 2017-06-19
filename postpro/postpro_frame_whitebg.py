@@ -299,17 +299,11 @@ def toggle_visibility(obj, event):
         camera.SetRoll(0.0)
         ren_win.Render()
     elif code == "s":
-        filename = "../Report/Benchmarks/figures/xx_benchmark_"
-        current_diagram = diagram_text.GetInput()
-        ext = ".png"
-        filename = filename + current_diagram + ext
-        w2if = vtk.vtkWindowToImageFilter()
-        w2if.SetInput(ren_win)
-        w2if.Update()
-        png_writer = vtk.vtkPNGWriter()
-        png_writer.SetFileName(filename)
-        png_writer.SetInput(w2if.GetOutput())
-        png_writer.Write()
+        pass
+#        filename = "../Report/Benchmarks/figures/xx_benchmark_"
+#        current_diagram = diagram_text.GetInput()
+#        ext = ".png"
+#        filename = filename + current_diagram
 #        exporter = vtk.vtkGL2PSExporter()
 #        exporter.SetFilePrefix(filename)
 #        exporter.CompressOff()
@@ -460,6 +454,7 @@ shear_end_actor.SetVisibility(0)
 shear_max_hogs.SetScaleFactor(shear_scale)
 shear_end_hogs.SetScaleFactor(shear_scale)
 moment_max_actor.SetVisibility(0)
+moment_max_actor.GetProperty().SetLineWidth(1.5)
 moment_end_actor.SetVisibility(0)
 moment_max_hogs.SetScaleFactor(moment_scale)
 moment_end_hogs.SetScaleFactor(moment_scale)

@@ -1,0 +1,70 @@
+================================================================================
+2DSTIFF - OUTPUT FILE
+[kN/m/C]
+================================================================================
+
+# NODE COORDINATES
+Node         x-coord     y-coord
+  1            0.00        0.00
+  2            5.00        0.00
+  3           10.00        0.00
+
+# SECTIONS
+Sec.No             A                   I                 h                  X
+  1            .3200D+00          .1707D-01            0.8000             0.0000
+
+# MATERIALS
+Mat.No             E                   v               alpha               gamma
+  1            .3000D+08             0.20            .0000D+00            0.0000
+
+# ELEMENTS
+El.No      Start Node      End Node       Section       Material
+  1            1             2               1             1
+  2            2             3               1             1
+
+# RESTRAINTS
+Restraint No         Node            Direction
+  1                    1                 1
+  2                    1                 2
+  3                    3                 1
+  4                    3                 2
+
+# LINKS
+Link No          Master Node         Slave Node         Direction
+
+# ELASTIC RESTRAINTS
+E. Restr. No        Node             Direction              K
+
+# ELASTIC LINKS
+E. Link. No        Node 1              Node 2           Direction        K
+
+# NODAL LOADS
+Node         Direction         Magnitude
+
+# ELEMENT LOADS
+Element       Px         Py1         Py2        DTtop      DTbottom
+  1          0.00      -25.00      -25.00        0.00        0.00
+  2          0.00      -25.00      -25.00        0.00        0.00
+
+# PRESTRESSING
+Element       e1          em          e2          P
+
+================================================================================
+ANALYSIS RESULTS
+================================================================================
+
+>> NODAL DISPLACEMENTS
+
+Node            DX                    DY                    PHI
+
+  1      0.0000000000D+00      0.0000000000D+00     -0.2034505208D-02
+  2      0.0000000000D+00     -0.6357828776D-02      0.0000000000D+00
+  3      0.0000000000D+00      0.0000000000D+00      0.2034505208D-02
+
+
+>> MEMBER END FORCES
+
+Member     N1          T1          M1          N2          T2          M2
+  1        0.00      125.00        0.00        0.00        0.00      312.50
+  2        0.00        0.00     -312.50        0.00      125.00       -0.00
+================================================================================

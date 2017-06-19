@@ -70,7 +70,7 @@ C
          CDIR   = IDINT(RSTE(I, 2))
          CK     = RSTE(I, 3)
          CDOF1  = IDOF(CNODE1, CDIR)
-         IF( CDOF.EQ.-1 ) THEN
+         IF( CDOF1.EQ.-1 ) THEN
             WRITE(*, '(A, I3)') 
      ;'Cannot apply elastic restraint to restrained node. Node:', CNODE1
             GO TO 10

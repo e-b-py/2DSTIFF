@@ -60,7 +60,7 @@ C
 C     Read the nodal coordinates
 C
 C     Skip the headers
-      READ(11, '(//)')
+      READ(11, '(////)')
 C      
       READ(11, *) NNODE
       DO 10 I = 1, NNODE
@@ -142,7 +142,7 @@ C Write all to output file
 C 
       WRITE(12, '(A)') '================================================
      ;================================'
-      WRITE(12, '(A)') 'INPUT DATA: [kN/m/C]'
+      WRITE(12, '(A/A)') '2DSTIFF - OUTPUT FILE', '[kN/m/C]'
       WRITE(12, '(A)') '================================================
      ;================================'
       WRITE(12, '(/A)') '# NODE COORDINATES'
@@ -185,22 +185,22 @@ C
          WRITE(12, '(I3, T20, I3, T40, I3, T59, I3)') 
      ;               I, (LNK(I, J), J=1,3)
   160 CONTINUE
-      RETURN
       WRITE(12, '(/A)') '# ELASTIC RESTRAINTS'
-      WRITE(12, '(A, T18, A, T38, A, T54, A)')
+      WRITE(12, '(A, T21, A, T38, A, T61, A)')
      ;          'E. Restr. No', 'Node', 'Direction', 'K'
       DO 170 I = 1, NRSTE
-         WRITE(12, '(I3, T20, I3, T40, I3, T56, D14.4)') 
-     ;               I, (LNK(I, J), J=1,3)
+         WRITE(12, '(I3, T20, I3, T40, I3, T53, D14.4)') 
+     ;               I, IDINT(RSTE(I, 1)), IDINT(RSTE(I, 2)), 
+     ;               RSTE(I, 3)
   170 CONTINUE
       WRITE(12, '(/A)') '# ELASTIC LINKS'
-      WRITE(12, '(A, T18, A, T38, A, T54, A)')
+      WRITE(12, '(A, T20, A, T40, A, T57, A, T74, A)')
      ;          'E. Link. No', 'Node 1', 'Node 2', 'Direction', 'K'
       DO 180 I = 1, NLNKE
-         WRITE(12, '(I3, T20, I3, T40, I3, T56, I3, T70, D14.4)') 
-     ;               I, (LNK(I, J), J=1,4)
+         WRITE(12, '(I3, T20, I3, T40, I3, T59, I3, T66, D14.4)') 
+     ;               I, IDINT(LNKE(I, 1)), IDINT(LNKE(I, 2)),
+     ;               IDINT(LNKE(I, 3)), LNKE(I, 4)
   180 CONTINUE
-      RETURN
       RETURN
 C
 C     .. End of GEOMET ..

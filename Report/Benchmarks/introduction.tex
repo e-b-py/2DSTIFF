@@ -1,0 +1,70 @@
+\section{Introduction}
+In this part of the report, the fundamental concepts regarding matrix discplacement
+methods will be briefly summerized, both for the sake of completeness and to 
+introduce the notation that will be used throughout the text. The topics are 
+explained in the order given below:
+\begin{itemize}
+   \item Fundamentals of elasticity
+   \item Energetical approaches to solve problems of elasticity
+   \item Stress based approach (Flexibility Method)
+   \item Displacement based approach (Stiffness Method)
+   \item Displacement method in matrix form
+\end{itemize}   
+%
+% Fundamentals of Elasticity
+%
+\subsection{Fundamentals of Elasticity}
+Elasticity is one great branch of mechanics that deal with deformable bodies which
+undergo deformations as a result of external effects, and in which the deformations
+vanish once the externally applied forces are removed. In addition to this
+reversibility, if the relationship between stresses and strains are linear, than it 
+is called 'Linear Elasticity', which will be one of the key assumptions of the 
+fornulation that follows. The linear elastic constitutive law can be simply stated as:
+
+\begin{equation}
+	\sigma = E \epsilon
+\end{equation}
+for the uniaxial case, where the stress and strain are denoted by $\sigma$ and 
+$\epsilon$  respectively, and E is the Young's Modulus of the material. 
+
+For plane stress, the law should be restated in matrix form as follows:
+
+\begin{equation*}
+	\bm{\sigma = D \epsilon}
+\end{equation*}
+\begin{equation*}
+	\begin{bmatrix}
+		\sigma_{xx} \\
+		\sigma_{yy} \\
+		\sigma_{xy} \\
+	\end{bmatrix}
+	= \frac{E}{1-\nu^2}
+	\begin{bmatrix}
+		1 & \nu & 0 \\
+		\nu & 1 & 0 \\
+		0 & 0 & 1-\nu
+	\end{bmatrix}
+	\begin{bmatrix}
+		\epsilon_{xx} \\
+		\epsilon_{yy} \\
+		\epsilon_{xy} \\
+	\end{bmatrix}
+\end{equation*}
+
+Now let's try a matrix in which there exists some submatrices:
+\begin{equation*}
+	\begin{bmatrix}
+		\bm{A_{11}^{'}} & \bm{A_{12}^{'}} \\
+		\bm{0} & \bm{A_{22}^{'}} \\
+	\end{bmatrix}
+\end{equation*}
+
+Adding images to the document: This is a sample moment diagram.
+\begin{figure}
+	\includegraphics{img/md1.jpg}
+	\centering
+	\caption{Sample moment diagram}
+	\label{fig:md1}
+\end{figure}
+Figure \ref{fig:md1} is a sample moment diagram.
+

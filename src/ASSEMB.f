@@ -2,13 +2,13 @@ C
 C =====================================================================
       SUBROUTINE ASSEMB(CON, LDCON, CRD, LDCRD, IDOF, LDIDOF, CSEC, 
      ;                  LDCSEC, ISEC, CMAT, LDCMAT, IMAT, ELDS, LDELDS, 
-     ;                  NLDS, KL, FL, KG, LDKG, FG)
+     ;                  EPRS, LDEPRS, NLDS, KL, FL, KG, LDKG, FG)
 C
 C     Assemble the global stiffness matrix and force vector.
 C
 C     .. Scalar Arguments ..
 C     INTEGER*4        LDCON, LDCRD, LDIDOF, LDCSEC, LDCMAT, LDELDS, 
-C                      LDKG
+C                      LDEPRS, LDKG
 C     ..
 C     .. Array Arguments ..
 C     INTEGER*4        CON(LDCON, *)  : Connectivity matrix
@@ -21,6 +21,7 @@ C                      CSEC(LDCSEC, *): Matrix of section properties
 C                      CMAT(LDCMAT, *): Matrix of material properties
 C                      NLDS(*)        : Vector of nodal loads
 C                      ELDS(LDELDS, *): Matrix of element loads
+C                      EPRS(LDEPRS, *): Matrix of prestressing
 C                      KL(6,6)        : Local stiffness matrix
 C                      FL(6)          : Local force matrix
 C                      KG(LDKG, *)    : Global stiffness matrix
@@ -56,8 +57,8 @@ C     ..
 C     .. Array Arguments ..
       INTEGER*4        CON(LDCON, *), IDOF(LDIDOF, *), ISEC(*), IMAT(*)
       REAL*8           CRD(LDCRD, *), CSEC(LDCSEC, *), CMAT(LDCMAT, *),
-     ;                 NLDS(*), ELDS(LDELDS, *), KL(6,6), FL(6),
-     ;                 KG(LDKG, *), FG(*)
+     ;                 NLDS(*), ELDS(LDELDS, *), EPRS(LDEPRS, *),
+     ;                 KL(6,6), FL(6), KG(LDKG, *), FG(*)
 C     ..
 C =====================================================================
 C     .. Local Scalars ..
@@ -80,7 +81,7 @@ C
       DO 10 I = 1, NELE
          CALL MKK(I, CON, LDCON, CRD, LDCRD, IDOF, LDIDOF, CSEC, 
      ;            LDCSEC, ISEC, CMAT, LDCMAT, IMAT, ELDS, LDELDS, 
-     ;            NLDS, KL, FL, KG, LDKG, FG, ELDOF)
+     ;            EPRS, LDEPRS, NLDS, KL, FL, KG, LDKG, FG, ELDOF)
 C
 C        Assemble 
 C

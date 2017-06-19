@@ -197,13 +197,15 @@ def max_disp(reader):
     vectors = data.GetVectors()
     u_max = 0
     v_max = 0
+    u_ind = 0 
+    v_ind = 0
     for i in range(points.GetNumberOfPoints()):
         u_current = vectors.GetTuple(i)[0]
         v_current = vectors.GetTuple(i)[1]
         if abs(u_current) > abs(u_max):
             u_max = u_current
             u_ind = i
-        if v_current > v_max:
+        if abs(v_current) > abs(v_max):
             v_max = v_current
             v_ind = i
     max_text_actor = vtk.vtkTextActor()

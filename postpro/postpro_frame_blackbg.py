@@ -299,16 +299,16 @@ def toggle_visibility(obj, event):
         camera.SetRoll(0.0)
         ren_win.Render()
     elif code == "s":
-        current_diagram = diagram_text.GetInput()
-        filename = "../Report/Benchmarks/figures/xx_benchmark_" + current_diagram
-        exporter = vtk.vtkGL2PSExporter()
-        exporter.SetRenderWindow(ren_win)
-        exporter.SetFilePrefix(filename)
-        exporter.CompressOff()
-        exporter.SetSortToBSP()
-        exporter.DrawBackgroundOn()
-        exporter.TextOn()
-        exporter.Write()
+#        current_diagram = diagram_text.GetInput()
+#        filename = "../Report/Benchmarks/figures/xx_benchmark_" + current_diagram
+#        exporter = vtk.vtkGL2PSExporter()
+#        exporter.SetRenderWindow(ren_win)
+#        exporter.SetFilePrefix(filename)
+#        exporter.CompressOff()
+#        exporter.SetSortToBSP()
+#        exporter.DrawBackgroundOn()
+#        exporter.TextOn()
+#        exporter.Write()
     else:
         pass
     return

@@ -1,0 +1,22 @@
+# Complementary input file for benchmarking
+# Nodes <Node number> <xcoor> <ycoor> <Label>
+2
+1 0.0 0.0 A
+2 10.0 0.0 B
+# Elements <Start node> <End node>
+1
+1 1 2
+# Restraints <Nrestr> <Node number> <1:roller, 2:pin, 3:fixed> <orientation>
+2
+1 2 0
+2 3 90
+# Point Loads <Npl> <Node Number> <Magnitude> <Orientation>
+0
+# Element Loads <Nel> <Element number> <Py1> <Py2> <Orientation>
+1
+1 25.0 25.0 270
+# X-dimensions <Nxdim> <Start node> <End node>
+1
+1 2
+# Y-dimensions <Nydim> <Start node> <End node>
+0
