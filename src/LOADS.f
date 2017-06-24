@@ -73,7 +73,7 @@ C
       READ(11, *) NNDL
       DO 10 I = 1, NNDL
          READ(11, *) CNODE, CDIR, CMAGN
-         WRITE(12, '(I3, T16, I3, T32, F6.2)') CNODE, CDIR, CMAGN
+         WRITE(12, '(I3, T16, I3, T32, F8.2)') CNODE, CDIR, CMAGN
          CDOF = IDOF(CNODE, CDIR)
          NLDS(CDOF) = CMAGN
    10 CONTINUE

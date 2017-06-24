@@ -1,0 +1,71 @@
+================================================================================
+2DSTIFF - OUTPUT FILE
+[kN/m/C]
+================================================================================
+
+# NODE COORDINATES
+Node         x-coord     y-coord
+  1            0.00        0.00
+  2            5.00        0.00
+  3           10.00        0.00
+
+# SECTIONS
+Sec.No             A                   I                 h                  X
+  1            .3200D+00          .1707D-01            0.8000             0.0000
+
+# MATERIALS
+Mat.No             E                   v               alpha               gamma
+  1            .3000D+08             0.20            .0000D+00            0.0000
+
+# ELEMENTS
+El.No      Start Node      End Node       Section       Material
+  1            1             2               1             1
+  2            2             3               1             1
+
+# RESTRAINTS
+Restraint No         Node            Direction
+  1                    1                 1
+  2                    1                 2
+  3                    1                 3
+  4                    3                 1
+  5                    3                 2
+  6                    3                 3
+
+# LINKS
+Link No          Master Node         Slave Node         Direction
+
+# ELASTIC RESTRAINTS
+E. Restr. No        Node             Direction              K
+
+# ELASTIC LINKS
+E. Link. No        Node 1              Node 2           Direction        K
+
+# NODAL LOADS
+Node         Direction         Magnitude
+  2              2             -15.00
+
+# ELEMENT LOADS
+Element       Px         Py1         Py2        DTtop      DTbottom
+
+# PRESTRESSING
+Element       e1          em          e2          P
+
+================================================================================
+ANALYSIS RESULTS
+================================================================================
+
+>> NODAL DISPLACEMENTS
+
+Node            DX                    DY                    PHI
+
+  1      0.0000000000D+00      0.0000000000D+00      0.0000000000D+00
+  2      0.0000000000D+00     -0.1525878906D-03      0.0000000000D+00
+  3      0.0000000000D+00      0.0000000000D+00      0.0000000000D+00
+
+
+>> MEMBER END FORCES
+
+MEM     N1            T1           M1           N2           T2           M2
+ 1  0.00000D+00  0.75000D+01  0.18750D+02  0.00000D+00 -0.75000D+01  0.18750D+02
+ 2  0.00000D+00 -0.75000D+01 -0.18750D+02  0.00000D+00  0.75000D+01 -0.18750D+02
+================================================================================

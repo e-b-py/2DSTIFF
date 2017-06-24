@@ -53,6 +53,8 @@ C                      N1   : Axial force at member end (start)
 C                      T1   : Shear force at member end (start)
 C                      M1   : Bending moment at member end (start)
 C                      CDSIP: Current displacement inside loop
+C                      SGX  : Sign specifier for diagrams
+C                      SGY  : Sign specifier for diagrams
 C     ..
 C     .. Local Arrays ..
 C     INTEGER*4        ELDOF(6) : Global DOFs corresponding to locals 
@@ -90,7 +92,7 @@ C     .. Local Scalars ..
       REAL*8           SCX, SCY, ECX, ECY, LX, LY, L, CSA, SNA, DIV, 
      ;                 STP, INC, AXF, SHF, BMO, DV, DH, PX, PY1, PY2,
      ;                 QY, ECC1, ECC2, ECCM, PPRS, THE1, WP, N1, T1, M1,
-     ;                 CDISP
+     ;                 CDISP, SGX, SGY
 C     ..
 C     .. Local Arrays ..
       INTEGER*4        ELDOF(6)
@@ -126,8 +128,10 @@ C
   902    CONTINUE
   901 CONTINUE
       WRITE(12, '(///A/)') '>> MEMBER END FORCES'     
-      WRITE(12, '(A, T12, A, T24, A, T36, A, T48, A, T60, A, T72, A)') 
-     ; 'Member', 'N1', 'T1', 'M1', 'N2', 'T2', 'M2'
+C      WRITE(12, '(A, T12, A, T24, A, T36, A, T48, A, T60, A, T72, A)') 
+C    ; 'Member', 'N1', 'T1', 'M1', 'N2', 'T2', 'M2'
+       WRITE(12, '(A, T9, A, T23, A, T36, A, T49, A, T62, A, T75, A)') 
+     ; 'MEM', 'N1', 'T1', 'M1', 'N2', 'T2', 'M2'
 C
 C     Create the Vtk files
 C
@@ -213,7 +217,7 @@ C
          DO 18 J = 1, 6
             WRITE(15, *) FL(J) 
    18    CONTINUE
-         WRITE(12, '(I3, 6F12.2)') I, FL(1), FL(2), FL(3), FL(4), FL(5),
+         WRITE(12, '(I2, 6D13.5)') I, FL(1), FL(2), FL(3), FL(4), FL(5),
      ;                            FL(6)
    19    CONTINUE
 C
@@ -246,13 +250,22 @@ C
          DH  = DSPL(1)
          DV  = DSPL(2)
 C
+C     VTK warp vector components' orientation according to diagram
+C     convention - positive moment top, negatvie moment bottom
+C
+         SGX = -1.D0
+         SGY = 1.D0
+C
 C     Write the initial values before loop along element length
 C     according to vtk warpvector convention (and transform local disp. 
 C     to global 
 C
-         WRITE(18, '(F24.16, F24.16, F24.16)') N1*SNA, N1*CSA, 0.D0
-         WRITE(20, '(F24.16, F24.16, F24.16)') T1*SNA, T1*CSA, 0.D0
-         WRITE(22, '(F24.16, F24.16, F24.16)') M1*SNA, M1*CSA, 0.D0
+         WRITE(18, '(F24.16, F24.16, F24.16)') 
+     ;                                 N1*SNA*SGX, N1*CSA*SGY, 0.D0
+         WRITE(20, '(F24.16, F24.16, F24.16)') 
+     ;                                 T1*SNA*SGX, T1*CSA*SGY, 0.D0
+         WRITE(22, '(F24.16, F24.16, F24.16)') 
+     ;                                 M1*SNA*SGX, M1*CSA*SGY, 0.D0
          WRITE(24, '(F24.16, F24.16, F24.16)') 
      ;               (CSA*DH - SNA*DV), (SNA*DH + CSA*DV), 0.D0
    60    IF( DABS(STP - L).GT.1.D-10 ) THEN
@@ -262,9 +275,12 @@ C
             BMO = M1 + T1*STP + (PY1 + WP)*STP**2/2.D0 
      ;           + QY*STP**3/(6.D0*L)
             CALL CUBIC(DSPL, STP, DH, DV, L)
-            WRITE(18, '(F24.16, F24.16, F24.16)') AXF*SNA, AXF*CSA, 0.D0
-            WRITE(20, '(F24.16, F24.16, F24.16)') SHF*SNA, SHF*CSA, 0.D0
-            WRITE(22, '(F24.16, F24.16, F24.16)') BMO*SNA, BMO*CSA, 0.D0
+            WRITE(18, '(F24.16, F24.16, F24.16)') 
+     ;                                 AXF*SNA*SGX, AXF*CSA*SGY, 0.D0
+            WRITE(20, '(F24.16, F24.16, F24.16)') 
+     ;                                 SHF*SNA*SGX, SHF*CSA*SGY, 0.D0
+            WRITE(22, '(F24.16, F24.16, F24.16)') 
+     ;                                 BMO*SNA*SGX, BMO*CSA*SGY, 0.D0
             WRITE(24, '(F24.16, F24.16, F24.16)') 
      ;                  (CSA*DH - SNA*DV), (SNA*DH + CSA*DV), 0.D0
             GO TO 60

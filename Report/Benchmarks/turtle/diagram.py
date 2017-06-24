@@ -43,8 +43,8 @@ class Frame:
             ecoorid = nodepos[enod-1][3]
             # Write first node's label
             turtle.penup()
-#            turtle.setposition(sxcoor+10, sycoor-30) changed for beams
-            turtle.setposition(sxcoor+0, sycoor-50)
+            turtle.setposition(sxcoor+10, sycoor-30) # for frames
+#            turtle.setposition(sxcoor+0, sycoor-50) # for beams
             turtle.write(scoorid, align='left', font=("", 15, ""))
             # Draw element
             turtle.setposition(sxcoor, sycoor)
@@ -52,8 +52,8 @@ class Frame:
             turtle.setposition(excoor, eycoor)
             # Write second node's label
             turtle.penup()
-#            turtle.setposition(sxcoor+10, sycoor-30) changed for beams
-            turtle.setposition(excoor+0, eycoor-50)
+            turtle.setposition(excoor+10, eycoor-30) # for frames
+#            turtle.setposition(excoor+0, eycoor-50)   # for beams
             turtle.write(ecoorid, align='left', font=("", 15, ""))
         return
     def draw_fixed_support(self, orientation, length=50):
@@ -326,7 +326,8 @@ class Frame:
         scale = self.scale
         # Position of the dimension lines
         xdimline = -100
-        ydimline = -200
+        #ydimline = -200
+        ydimline = -100
         # ---------------------
         nodepos = self.indict['nodepos']
         elem = self.indict['elem']
